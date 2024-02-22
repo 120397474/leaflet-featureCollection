@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>leaflet</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>
+  <style>
+    html, body, #map {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+   <script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+   <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+   <script src="http://kartena.github.io/Proj4Leaflet/lib/proj4-compressed.js"></script>
+   <script src="http://kartena.github.io/Proj4Leaflet/src/proj4leaflet.js"></script>
+   <link rel="stylesheet" href="https://leaflet.github.io/Leaflet.markercluster/dist/MarkerCluster.css"/>
+   <link rel="stylesheet" href="https://leaflet.github.io/Leaflet.markercluster/dist/MarkerCluster.Default.css"/>
+   <script src="https://leaflet.github.io/Leaflet.markercluster/dist/leaflet.markercluster-src.js"></script>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  // leaflet = 高德
+  var geojson = {"type":"FeatureCollection", "features": [
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[121.526098, 38.859573]},"properties":{"Name_CHN":"纳米大厦","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[121.526098, 38.859573]},"properties":{"Name_CHN":"纳米大厦","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[121.526098, 38.859573]},"properties":{"Name_CHN":"纳米大厦","StationNum":1,"Status":1}},
+
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[121.515881, 38.86096]},"properties":{"Name_CHN":"IC大厦","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[121.515881, 38.86096]},"properties":{"Name_CHN":"IC大厦","StationNum":1,"Status":1}},
+
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.399576,40.007228]},"properties":{"Name_CHN":"奥林匹克公园","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.399576,40.007228]},"properties":{"Name_CHN":"奥林匹克公园","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.399576,40.007228]},"properties":{"Name_CHN":"奥林匹克公园","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.399576,40.007228]},"properties":{"Name_CHN":"奥林匹克公园","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.399576,40.007228]},"properties":{"Name_CHN":"奥林匹克公园","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.399576,40.007228]},"properties":{"Name_CHN":"奥林匹克公园","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.399576,40.007228]},"properties":{"Name_CHN":"奥林匹克公园","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.399576,40.007228]},"properties":{"Name_CHN":"奥林匹克公园","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.399576,40.007228]},"properties":{"Name_CHN":"奥林匹克公园","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.399576,40.007228]},"properties":{"Name_CHN":"奥林匹克公园","StationNum":1,"Status":1}},
+
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.404699,39.899689]},"properties":{"Name_CHN":"前门大街","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.404699,39.899689]},"properties":{"Name_CHN":"前门大街","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.404699,39.899689]},"properties":{"Name_CHN":"前门大街","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.404699,39.899689]},"properties":{"Name_CHN":"前门大街","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.404699,39.899689]},"properties":{"Name_CHN":"前门大街","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.404699,39.899689]},"properties":{"Name_CHN":"前门大街","StationNum":1,"Status":1}},
+  {"type":"Feature","geometry":{"type":"Point","coordinates":[116.404699,39.899689]},"properties":{"Name_CHN":"前门大街","StationNum":1,"Status":1}},
+
+]};
+  var map = L.map('map', {
+        minZoom: 5,
+        maxZoom: 15
+    });
+  L.tileLayer('http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}').addTo(map);
+  map.setView(L.latLng(39.924091, 116.403414), 5);  //设置缩放级别及中心点
+
+  //聚合图
+  var projectPointLayer = L.markerClusterGroup({
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true,
+      chunkedLoading: true,
+      maxClusterRadius: 80, //默认80
+   }).addTo(map);
+
+  if (geojson) {
+    addProjectClusterLayers(geojson, projectPointLayer);
+    projectPointLayer.on("click", function (e) {
+      e.layer.unbindPopup();
+      var elements = getProjectPopupContent(
+      e.layer.options.properties
+      );
+      e.layer.bindPopup(elements[0]).openPopup(e.latlng);
+    });
+  }
+
+  /*
+   * 点单击内容函数
+   */
+  function getProjectPopupContent(item) {
+    const { toPopupItemStr } = this;
+    const me = this;
+    // 内容及单击事件
+    const elements = $(
+      `<div>
+        ${toPopupItemStr("名称", item.Name_CHN)}
+        ${toPopupItemStr("数量", item.StationNum)}
+      </div>`
+    );
+    return elements;
+  }
+
+  // 转为popup项
+  function toPopupItemStr(name, value){
+    return value ? `<b>${name}：</b>${value}<br>` : "";
+  };
+
+  /*
+   * 加载聚合图层
+   */
+  function addProjectClusterLayers(geojson, clusterlayer) {
+    var markerList = [];
+    if (geojson.features.length > 0) {
+      for (var i = 0; i < geojson.features.length; i++) {
+        if (geojson.features[i].geometry) {
+		  var properties = geojson.features[i].properties;
+          var coordinate = geojson.features[i].geometry.coordinates;
+		  //根据Status类型不同加载不同图标
+		  var img = './img/projectPoint_HGX.png';
+		  switch(properties.Status) {
+			 case 1:
+			    img = './img/projectPoint_HGX.png';
+				break;
+			 case 2:
+			    img = './img/projectPoint_JSZT.png';
+				break;
+			 case 3:
+			    img = './img/projectPoint_XMXZ.png';
+				break;
+			 case 4:
+			    img = './img/projectPoint_XMZS.png';
+				break;
+		  }
+          var myIcon = L.icon({
+            iconUrl: img,
+            iconSize: [25, 25],
+          });
+          var marker = L.marker(new L.LatLng(coordinate[1], coordinate[0]), {
+            properties: properties,
+            icon: myIcon,
+          });
+          markerList.push(marker);
+        }
+      }
+    }
+    clusterlayer.addLayers(markerList);
+  };
+
+ 
+</script>
+
+
+
+</body>
+</html>
